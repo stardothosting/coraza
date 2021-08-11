@@ -20,12 +20,11 @@ type NoAuditlog struct {
 }
 
 func (a *NoAuditlog) Init(r *engine.Rule, data string) error {
-	r.Log = false
 	return nil
 }
 
 func (a *NoAuditlog) Evaluate(r *engine.Rule, tx *engine.Transaction) {
-	// Not evaluated
+	tx.Log = true
 }
 
 func (a *NoAuditlog) Type() int {
