@@ -16,7 +16,7 @@ package operators
 
 import (
 	engine "github.com/jptosso/coraza-waf"
-	"github.com/jptosso/coraza-waf/utils"
+	"github.com/jptosso/coraza-waf/utils/libinjection"
 )
 
 type DetectXSS struct{}
@@ -27,5 +27,5 @@ func (o *DetectXSS) Init(data string) error {
 
 func (o *DetectXSS) Evaluate(tx *engine.Transaction, value string) bool {
 	//TODO this is supposed to capture the vals but libinjection API doesn't return an output
-	return utils.IsXSS(value)
+	return libinjection.IsXSS(value)
 }
