@@ -17,18 +17,23 @@ package actions
 import engine "github.com/jptosso/coraza-waf"
 
 type Append struct {
-	Data string
+	data string
 }
 
 func (a *Append) Init(r *engine.Rule, data string) error {
-	a.Data = data
+	a.data = data
 	return nil
 }
 
 func (a *Append) Evaluate(r *engine.Rule, tx *engine.Transaction) {
-	// Not implemented
+	if !tx.Waf.ContentInjection {
+		tx.Waf.Logger.Debug("append rejected because of ContentInjection")
+		return
+	}
+	data := tx.MacroExpansion(a.data)
+	tx.ResponseBodyBuffer.Write([]byte(data))
 }
 
 func (a *Append) Type() int {
-	return engine.ACTION_TYPE_METADATA
+	return engine.ACTION_TYPE_NONDISRUPTIVE
 }
