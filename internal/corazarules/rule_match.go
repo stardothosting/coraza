@@ -267,6 +267,21 @@ func (mr MatchedRule) ErrorLog() string {
 
 	log := &strings.Builder{}
 
+	var resolvedIP string
+	// Try to get hostname from Host header first
+	host := tx.Variables().RequestHeaders().Get("Host")
+	if host != "" {
+		// If Host header contains port, strip it off
+		if strings.Contains(host, ":") {
+			resolvedIP = strings.Split(host, ":")[0]
+		} else {
+			resolvedIP = host
+		}
+	} else {
+		// Fallback to server IP if no Host header is present
+		resolvedIP = tx.Variables().ServerAddr().Get()
+	}
+
 	fmt.Fprintf(log, "[client %q] ", mr.ClientIPAddress_)
 	if mr.Disruptive_ {
 		writeDisruptiveActionSpecificLog(log, mr)
