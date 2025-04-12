@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/corazawaf/coraza/v3/corazawaf"
 	"github.com/corazawaf/coraza/v3/types"
 	"github.com/corazawaf/coraza/v3/types/variables"
 )
@@ -319,5 +320,26 @@ func writeDisruptiveActionSpecificLog(log *strings.Builder, mr MatchedRule) {
 		fmt.Fprintf(log, "Coraza: Access redirected (phase %d). ", mr.Rule_.Phase())
 	default:
 		fmt.Fprintf(log, "Coraza: Custom disruptive action triggered (phase %d). ", mr.Rule_.Phase())
+	}
+}
+
+func (rm *RuleMatch) getAuditLogData(tx *corazawaf.Transaction) *types.AuditLogData {
+	var resolvedIP string
+	// Try to get hostname from Host header first
+	host := tx.Variables().RequestHeaders().Get("Host")
+	if host != "" {
+		// If Host header contains port, strip it off
+		if strings.Contains(host, ":") {
+			resolvedIP = strings.Split(host, ":")[0]
+		} else {
+			resolvedIP = host
+		}
+	} else {
+		// Fallback to server IP if no Host header is present
+		resolvedIP = tx.Variables().ServerAddr().Get()
+	}
+
+	return &types.AuditLogData{
+		ResolvedIP: resolvedIP,
 	}
 }
