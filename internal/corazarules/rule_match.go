@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/corazawaf/coraza/v3/corazawaf"
 	"github.com/corazawaf/coraza/v3/types"
 	"github.com/corazawaf/coraza/v3/types/variables"
 )
@@ -304,5 +305,15 @@ func writeDisruptiveActionSpecificLog(log *strings.Builder, mr MatchedRule) {
 		fmt.Fprintf(log, "Coraza: Access redirected (phase %d). ", mr.Rule_.Phase())
 	default:
 		fmt.Fprintf(log, "Coraza: Custom disruptive action triggered (phase %d). ", mr.Rule_.Phase())
+	}
+}
+
+func (rm *RuleMatch) getAuditLogData(tx *corazawaf.Transaction) *types.AuditLogData {
+	return &types.AuditLogData{
+		ID:               rm.Rule.ID(),
+		Message:          rm.Rule.Msg(),
+		Data:             &types.AuditLogDataData{},
+		URI:              tx.Variables().RequestURI().Get(),
+		ResolvedHostname: "test-hostname",
 	}
 }
